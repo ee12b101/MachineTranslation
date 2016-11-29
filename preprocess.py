@@ -40,10 +40,13 @@ for i in range(len(inputData)):
         
         # preprocess and save the data
         if alignment == '1-1':
-            dataset['english'].append(prepro_sentence_english(englishSegment))
-            dataset['hindi'].append(prepro_sentence_hindi(hindiSegment))
+            englishSegmentPrepro = prepro_sentence_english(englishSegment)
+            hindiSegmentPrepro = prepro_sentence_hindi(hindiSegment)
+            if len(englishSegmentPrepro.split()) <= 30 and len(hindiSegmentPrepro.split()) <= 30:
+                dataset['english'].append(prepro_sentence_english(englishSegment))
+                dataset['hindi'].append(prepro_sentence_hindi(hindiSegment))
 
-print('Filtered data, using only sentences with 1-1 alignment: %d/%d sentences used'%(len(dataset['english']), len(inputData)))
+print('Filtered data, using only sentences with 1-1 alignment. Also removed sentences longer than 30 in length: %d/%d sentences used'%(len(dataset['english']), len(inputData)))
 
 # formatted saving of data in text format
 
