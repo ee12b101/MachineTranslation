@@ -1,8 +1,8 @@
 1. Preprocess raw data (preprocess.py) -- Completed
-2. Extract vocabulary, filter, creat splits and encode dataset
+2. Extract vocabulary, filter, creat splits and encode dataset -- Completed
    in .h5 and .json files (prepareDataset.py)
 3. Data Loading functions (DataLoader.lua)
-4. Model definitions (no attn, global attn, local attn)
+4. Model definitions (no attn -- Completed , global attn, local attn)
 5. Training code independent of model used
 6. Testing code independent of model used
 7. Visualization code (to see if attention mechanism works well)
