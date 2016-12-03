@@ -1,6 +1,6 @@
 require 'nn'
-require 'misc.LSTM_decoder'
-require 'misc.LSTM_encoder'
+local LSTM_decoder = require 'misc.LSTM_decoder'
+local LSTM_encoder = require 'misc.LSTM_encoder'
 local utils = require 'misc.utils'
 
 local SimpleMT, Parent = torch.class('nn.SimpleMT', 'nn.Module')
@@ -19,20 +19,35 @@ function SimpleMT:__init(opt)
 	-- Word embedding layers for the 2 languages
 	self.lang1Embedding = nn.LookupTable(self.lang1VocabSize+1, self.wordEmbeddingSize)
 	self.lang2Embedding = nn.LookupTable(self.lang2VocabSize+1, self.wordEmbeddingSize)
+	-- Lazy initialization of init states, helpful in conversion to CUDA tensor
+	self:initializeStates(1)
 	-- To encode the 1st langugage sentence
-	self.Encoder = nn.LSTM_encoder(self.wordEmbeddingSize, self.rnnLayerSize, self.numLayers, self.dropout)
+	self.Encoder = LSTM_encoder.lstm(self.wordEmbeddingSize, self.rnnLayerSize, self.numLayers, self.dropout)
 	-- To decode to the 2nd language sentence
-	self.Decoder = nn.LSTM_decoder(self.wordEmbeddingSize, self.lang2VocabSize+1, self.rnnLayerSize, self.numLayers, self.dropout)
+	self.Decoder = LSTM_decoder.lstm(self.wordEmbeddingSize, self.lang2VocabSize+1, self.rnnLayerSize, self.numLayers, self.dropout)
 
 end
 
 function SimpleMT:initializeStates(batchSize)
+	assert(batchSize ~= nil, 'No batchSize provided!')
+	if not self.EncoderInitStates then self.EncoderInitStates = {} end
+	if not self.DecoderInitStates then self.DecoderInitStates = {} end
 
-	self.EncoderInitStates = {}
-	self.DecoderInitStates = {}
 	for i = 1, 2*self.numLayers do
-		table.insert(self.EncoderInitStates, torch.zeros(batchSize, self.rnnLayerSize))
-		table.insert(self.DecoderInitStates, torch.zeros(batchSize, self.rnnLayerSize))
+		if self.EncoderInitStates[i] then
+			if self.EncoderInitStates[i]:size(1) ~= batchSize then
+				self.EncoderInitStates[i]:resize(batchSize, self.rnnLayerSize):zero()
+			end
+		else
+			self.EncoderInitStates[i] = torch.zeros(batchSize, self.rnnLayerSize)
+		end
+		if self.DecoderInitStates[i] then
+			if self.DecoderInitStates[i]:size(1) ~= batchSize then
+				self.DecoderInitStates[i]:resize(batchSize, self.rnnLayerSize):zero()
+			end
+		else
+			self.DecoderInitStates[i] = torch.zeros(batchSize, self.rnnLayerSize)
+		end
 	end
 	self.numStates = 2*self.numLayers
 end
@@ -45,11 +60,13 @@ function SimpleMT:createClones()
 	self.lang2EmbeddingClones = {self.lang2Embedding}
 
 	for t = 2, self.maxLength1 do
+		print('Encoder clone: t = ' .. t)
 		self.EncoderClones[t] = self.Encoder:clone('weight', 'bias', 'gradWeight', 'gradBias')
 		self.lang1EmbeddingClones[t] = self.lang1EmbeddingClones[1]:clone('weight', 'gradWeight')
 	end
 
-	for t = 2, self.maxLength2 do
+	for t = 2, self.maxLength2+1 do
+		print('Decoder clone: t = ' .. t)
 		self.DecoderClones[t] = self.Decoder:clone('weight', 'bias', 'gradWeight', 'gradBias')
 		self.lang2EmbeddingClones[t] = self.lang2EmbeddingClones[1]:clone('weight', 'gradWeight')
 	end
@@ -79,7 +96,7 @@ function SimpleMT:parameters()
 
 end
 
-function layer:training()
+function SimpleMT:training()
 	
 	if self.EncoderClones == nil or self.DecoderClones == nil then self:createClones() end
 	for k,v in pairs(self.EncoderClones) do v:training() end
@@ -89,7 +106,11 @@ function layer:training()
 
 end
 
-function layer:evaluate()
+function SimpleMT:getModulesList()
+	return {self.Encoder, self.Decoder, self.lang1Embedding, self.lang2Embedding}
+end
+
+function SimpleMT:evaluate()
 	
 	if self.EncoderClones == nil or self.DecoderClones == nil then self:createClones() end
 	for k,v in pairs(self.EncoderClones) do v:evaluate() end
@@ -103,16 +124,12 @@ end
 -- [1] lang1Vector : maxLength1 x batchSize
 function SimpleMT:sample(input)
 
-	lang1Vector = input[1]
+	lang1Vector = input
 	local batchSize = lang1Vector:size(2)
+	self:initializeStates(batchSize)
 
-	-- Caveat: the batch size of sampling must be same as training
-	if not self.EncoderInitStates then
-		self:initializeStates(batchSize)
-	end
-
-	local lang2Pred = torch.Tensor(self.maxLength2, batchSize):zero()
-	local lang2LogProbs = torch.Tensor(self.maxLength2, batchSize):zero()
+	local lang2Pred = torch.Tensor(self.maxLength2+1, batchSize):zero()
+	local lang2LogProbs = torch.Tensor(self.maxLength2+1, batchSize):zero()
 
 	-- Encoder forward propagation
 	local EncoderState = self.EncoderInitStates
@@ -125,7 +142,7 @@ function SimpleMT:sample(input)
 		end
 
 		if skip == 0 then
-			it[it:eq(0)] = 1
+			it[it:eq(0)] = self.lang1VocabSize+1
 			xt = self.lang1EmbeddingClones[t]:forward(it)
 			EncoderState = self.EncoderClones[t]:forward({xt, unpack(EncoderState)})
 		end
@@ -139,6 +156,8 @@ function SimpleMT:sample(input)
 		local it
 		if t == 1 then
 			it = torch.Tensor(batchSize):fill(self.lang2VocabSize+1)
+		else
+			it = lang2Pred[t-1]
 		end
 	
 		xt = self.lang2EmbeddingClones[t]:forward(it)
@@ -176,9 +195,7 @@ function SimpleMT:updateOutput(input)
 
 	local batchSize = lang1Vector:size(2)
 	-- Initialize the states if not initialized already
-	if not self.EncoderInitStates then
-		self:initializeStates(batchSize)
-	end
+	self:initializeStates(batchSize)
 	self.EncoderStates[0] = self.EncoderInitStates
 
 	-- Encoder forward propagation
@@ -190,10 +207,8 @@ function SimpleMT:updateOutput(input)
 		end
 
 		if skip == 0 then -- for optimization
-			it[it:eq(0)] = 1  -- To ensure that the LookupTable doesn't throw errors
-			-- This will be accounted for in the loss function, where we ignore loss
-			-- beyond the point where 0s occur
-
+			it[it:eq(0)] = self.lang1VocabSize+1  -- To ensure that the LookupTable
+			-- doesn't throw errors. 
 			self.lang1EmbeddingInputs[t] = it
 			xt = self.lang1EmbeddingClones[t]:forward(it)
 			self.EncoderInputs[t] = {xt, unpack(self.EncoderStates[t-1])}
@@ -229,22 +244,22 @@ function SimpleMT:updateOutput(input)
 		end
 
 		if skip == 0 then
-			it[it:eq(0)] = 1
+			it[it:eq(0)] = self.lang2VocabSize+1
 
 			self.lang2EmbeddingInputs[t] = it
 			xt = self.lang2EmbeddingClones[t]:forward(it)
 			self.DecoderInputs[t] = {xt, unpack(self.DecoderStates[t-1])}
 			local tempOut = self.DecoderClones[t]:forward(self.DecoderInputs[t])
-			self.OutputDec[t] = tempOut[self.numStates+1]
+			self.outputDec[t] = tempOut[self.numStates+1]
 			self.DecoderStates[t] = {}
 			for i = 1, self.numStates do
-				self.DecoderStates[t][i] = self.OutputDec[t][i]
+				self.DecoderStates[t][i] = tempOut[i]
 			end
 			self.tmax2 = t
 		end
 	end
 
-	return self.OutputDec
+	return self.outputDec
 
 end
 
@@ -261,42 +276,44 @@ function SimpleMT:updateGradInput(input, gradOutput)
 		
 		local dDecoder = {}
 		for i = 1, self.numStates do
-			table.insert(dDecoder, dDecoderStates[i])
+			table.insert(dDecoder, self.dDecoderStates[t][i])
 		end
 		table.insert(dDecoder, gradOutput[t])
-
+		
 		local dInputs = self.DecoderClones[t]:backward(self.DecoderInputs[t], dDecoder)
 		self.dDecoderStates[t-1] = {}
 		-- gradients wrt prev_c, prev_h
-		for i = 1, self.numStates do
+		for i = 2, self.numStates+1 do
 			table.insert(self.dDecoderStates[t-1], dInputs[i])
 		end
 		-- gradients wrt wordEmbedding
 		local it = self.lang2EmbeddingInputs[t]
-		dw = self.lang2EmbeddingClones[t]:backward(it, self.dInputs[self.numStates+1])
+		dw = self.lang2EmbeddingClones[t]:backward(it, dInputs[1])
 	end
 
 	-- Initialize encoder gradients from the first decoder gradient
-	self.dEncoderStates[self.tmax1] = self.dDecoderStates[1]
+	self.dEncoderStates[self.tmax1] = self.dDecoderStates[0]
 	-- Encoder backward propagation
 	for t = self.tmax1, 1, -1 do
 		local dEncoder = {}
 		for i = 1, self.numStates do
-			table.insert(dEncoder, dEncoderStates[i])
+			table.insert(dEncoder, self.dEncoderStates[t][i])
 		end
 
 		local dInputs = self.EncoderClones[t]:backward(self.EncoderInputs[t], dEncoder)
+		
 		self.dEncoderStates[t-1] = {}
 		-- gradients wrt prev_C, prev_h
-		for i = 1, self.numStates do
-			table.insert(self.dEncoderStates, dInputs[t])
+		for i = 2, self.numStates+1 do
+			table.insert(self.dEncoderStates[t-1], dInputs[i])
 		end
 		-- gradients wrt wordEmbedding
 		local it = self.lang1EmbeddingInputs[t]
-		dw = self.lang1EmbeddingClones[t]:backward(it, dInputs[self.numStates+1])
+		dw = self.lang1EmbeddingClones[t]:backward(it, dInputs[1])
 	end
 
-	return {}
+	self.gradInput = {torch.Tensor()}
+	return self.gradInput
 
 end
 

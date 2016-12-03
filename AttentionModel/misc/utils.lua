@@ -14,15 +14,24 @@ function utils.read_json(path)
 	local text = file:read()
 	file:close()
 	local info = cjson.decode(text)
-	reutrn info
+	return info
 end
 
 function utils.count_keys(t)
 	local n = 0
-	for ,v in pairs(t) do
+	for k,v in pairs(t) do
 		n = n + 1
 	end
 	return n
+end
+
+function utils.write_json(path, j)
+  -- API reference http://www.kyne.com.au/~mark/software/lua-cjson-manual.html#encode
+  cjson.encode_sparse_array(true, 2, 10)
+  local text = cjson.encode(j)
+  local file = io.open(path, 'w')
+  file:write(text)
+  file:close()
 end
 
 return utils

@@ -57,6 +57,14 @@ function DataLoader:getVocabLang2()
 	return self.ix_to_word_lang2
 end
 
+function DataLoader:getSeqLengthLang1()
+	return self.seq_length_lang1
+end
+
+function DataLoader:getSeqLengthLang2()
+	return self.seq_length_lang2
+end
+
 --[[
   Split is a string identifier (e.g. train|val|test)
   Returns a batch of data:
