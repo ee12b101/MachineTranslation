@@ -42,7 +42,7 @@ for i in range(len(inputData)):
         if alignment == '1-1':
             englishSegmentPrepro = prepro_sentence_english(englishSegment)
             hindiSegmentPrepro = prepro_sentence_hindi(hindiSegment)
-            if len(englishSegmentPrepro.split()) <= 30 and len(hindiSegmentPrepro.split()) <= 30:
+            if len(englishSegmentPrepro.split()) <= 30 and len(hindiSegmentPrepro.split()) <= 30 and len(englishSegmentPrepro.split()) > 5 and len(hindiSegmentPrepro.split()) > 5:
                 dataset['english'].append(prepro_sentence_english(englishSegment))
                 dataset['hindi'].append(prepro_sentence_hindi(hindiSegment))
 
@@ -52,7 +52,7 @@ print('Filtered data, using only sentences with 1-1 alignment. Also removed sent
 
 f = open(preprocessedSavePath, 'w')
 for i in range(len(dataset['english'])):
-    f.write('%s::%s\n'%(dataset['english'][i], dataset['hindi'][i]))
+    f.write('%s::%s\n'%(dataset['hindi'][i], dataset['english'][i]))
 
 f.close()
 

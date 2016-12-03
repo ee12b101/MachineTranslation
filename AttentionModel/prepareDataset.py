@@ -94,8 +94,25 @@ def main(params):
             split = 'train'
         lang1Splits[split].append(lang1data[i])
         lang2Splits[split].append(lang2data[i])
-   
-    print('Create data splits!')
+  
+    # Sort the data based on length of sentences first in each split
+    # This is done in order to minimze the effect of NULL tokens in the end
+    for split in ['train', 'val', 'test']:
+        lang1Lengths = []
+        for i in range(len(lang1Splits[split])):
+            lang1Lengths.append(len(lang1Splits[split][i]))
+        combined = zip(lang1Lengths, lang1Splits[split], lang2Splits[split])
+        combined_sorted = sorted(combined, reverse=True)
+        lang1SplitTemp = []
+        lang2SplitTemp = []
+        for i in range(len(lang1Splits[split])):
+            lang1SplitTemp.append(combined_sorted[i][1])
+            lang2SplitTemp.append(combined_sorted[i][2])
+        lang1Splits[split] = lang1SplitTemp
+        lang2Splits[split] = lang2SplitTemp
+
+    pdb.set_trace()
+    print('Created data splits!')
     # Create lang1 and lang2 vocabs from train+val
     lang1vocab = createVocab(lang1Splits['train']+lang1Splits['val'], params)
     lang2vocab = createVocab(lang2Splits['train']+lang2Splits['val'], params)
@@ -155,8 +172,8 @@ if __name__ == "__main__":
     parser.add_argument('--max_length_filter', default=30, type=int, help='filter out all data longer than this threshold (to reduce computational load)')
     parser.add_argument('--max_vocab_size', default=30000, type=int, help='limit the vocabulary size')
     parser.add_argument('--word_count_thresh', default=5, type=int, help='remove infrequent words from the vocabulary and set them as UNK')
-    parser.add_argument('--num_test', default=41999, type=int, help='number of test samples')
-    parser.add_argument('--num_val', default=20000, type=int, help='number of validation samples')
+    parser.add_argument('--num_test', default=40000, type=int, help='number of test samples')
+    parser.add_argument('--num_val', default=21965, type=int, help='number of validation samples')
     parser.add_argument('--save_h5', required=True, help='Save path for encoded data in .h5 format')
     parser.add_argument('--save_json', required=True, help='Save path for auxilliary data in .json format')
 
