@@ -116,6 +116,7 @@ end
 -- flatten and prepare all model parameters to a single vector. 
 -- Keep CNN params separate in case we want to try to get fancy with different optims on LM/CNN
 local params, grad_params = protos.mt:getParameters()
+--params:uniform(-0.08, 0.08)
 print('total number of parameters in MachineTranslator: ', params:nElement())
 assert(params:nElement() == grad_params:nElement())
 
