@@ -1,0 +1,83 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+EOS_ID	data_utils.py	/^EOS_ID = 2$/;"	v
+FLAGS	translate.py	/^FLAGS = tf.app.flags.FLAGS$/;"	v
+GO_ID	data_utils.py	/^GO_ID = 1$/;"	v
+PAD_ID	data_utils.py	/^PAD_ID = 0$/;"	v
+Seq2SeqModel	seq2seq_model.py	/^class Seq2SeqModel(object):$/;"	c
+UNK_ID	data_utils.py	/^UNK_ID = 3$/;"	v
+_DIGIT_RE	data_utils.py	/^_DIGIT_RE = re.compile(br"\\d")$/;"	v
+_EOS	data_utils.py	/^_EOS = b"_EOS"$/;"	v
+_GO	data_utils.py	/^_GO = b"_GO"$/;"	v
+_PAD	data_utils.py	/^_PAD = b"_PAD"$/;"	v
+_START_VOCAB	data_utils.py	/^_START_VOCAB = [_PAD, _GO, _EOS, _UNK]$/;"	v
+_UNK	data_utils.py	/^_UNK = b"_UNK"$/;"	v
+_WMT_ENFR_DEV_URL	data_utils.py	/^_WMT_ENFR_DEV_URL = "http:\/\/www.statmt.org\/wmt15\/dev-v2.tgz"$/;"	v
+_WMT_ENFR_TRAIN_URL	data_utils.py	/^_WMT_ENFR_TRAIN_URL = "http:\/\/www.statmt.org\/wmt10\/training-giga-fren.tar"$/;"	v
+_WORD_SPLIT	data_utils.py	/^_WORD_SPLIT = re.compile(b"([.,!?\\"':;)(])")$/;"	v
+__init__	seq2seq_model.py	/^  def __init__(self,$/;"	m	class:Seq2SeqModel
+_buckets	translate.py	/^_buckets = [(5, 10), (10, 15), (20, 25), (40, 50)]$/;"	v
+absolute_import	data_utils.py	/^from __future__ import absolute_import$/;"	i
+absolute_import	seq2seq_model.py	/^from __future__ import absolute_import$/;"	i
+absolute_import	translate.py	/^from __future__ import absolute_import$/;"	i
+basic_tokenizer	data_utils.py	/^def basic_tokenizer(sentence):$/;"	f
+builtin	seq2seq_model.py	/^from six.moves import xrange  # pylint: disable=redefined-builtin$/;"	i
+builtin	translate.py	/^from six.moves import xrange  # pylint: disable=redefined-builtin$/;"	i
+create_model	translate.py	/^def create_model(session, forward_only):$/;"	f
+create_vocabulary	data_utils.py	/^def create_vocabulary(vocabulary_path, data_path, max_vocabulary_size,$/;"	f
+data_to_token_ids	data_utils.py	/^def data_to_token_ids(data_path, target_path, vocabulary_path,$/;"	f
+data_utils	seq2seq_model.py	/^from tensorflow.models.rnn.translate import data_utils$/;"	i
+data_utils	translate.py	/^from tensorflow.models.rnn.translate import data_utils$/;"	i
+decode	translate.py	/^def decode():$/;"	f
+disable	seq2seq_model.py	/^from six.moves import xrange  # pylint: disable=redefined-builtin$/;"	i
+disable	translate.py	/^from six.moves import xrange  # pylint: disable=redefined-builtin$/;"	i
+division	data_utils.py	/^from __future__ import division$/;"	i
+division	seq2seq_model.py	/^from __future__ import division$/;"	i
+division	translate.py	/^from __future__ import division$/;"	i
+get_batch	seq2seq_model.py	/^  def get_batch(self, data, bucket_id):$/;"	m	class:Seq2SeqModel
+get_wmt_enfr_dev_set	data_utils.py	/^def get_wmt_enfr_dev_set(directory):$/;"	f
+get_wmt_enfr_train_set	data_utils.py	/^def get_wmt_enfr_train_set(directory):$/;"	f
+gfile	data_utils.py	/^from tensorflow.python.platform import gfile$/;"	i
+gunzip_file	data_utils.py	/^def gunzip_file(gz_path, new_path):$/;"	f
+gzip	data_utils.py	/^import gzip$/;"	i
+initialize_vocabulary	data_utils.py	/^def initialize_vocabulary(vocabulary_path):$/;"	f
+logging	translate.py	/^import logging$/;"	i
+main	translate.py	/^def main(_):$/;"	f
+math	translate.py	/^import math$/;"	i
+maybe_download	data_utils.py	/^def maybe_download(directory, filename, url):$/;"	f
+np	seq2seq_model.py	/^import numpy as np$/;"	i
+np	translate.py	/^import numpy as np$/;"	i
+os	data_utils.py	/^import os$/;"	i
+os	translate.py	/^import os$/;"	i
+prepare_wmt_data	data_utils.py	/^def prepare_wmt_data(data_dir, en_vocabulary_size, fr_vocabulary_size, tokenizer=None):$/;"	f
+print_function	data_utils.py	/^from __future__ import print_function$/;"	i
+print_function	seq2seq_model.py	/^from __future__ import print_function$/;"	i
+print_function	translate.py	/^from __future__ import print_function$/;"	i
+pylint	seq2seq_model.py	/^from six.moves import xrange  # pylint: disable=redefined-builtin$/;"	i
+pylint	translate.py	/^from six.moves import xrange  # pylint: disable=redefined-builtin$/;"	i
+random	seq2seq_model.py	/^import random$/;"	i
+random	translate.py	/^import random$/;"	i
+re	data_utils.py	/^import re$/;"	i
+read_data	translate.py	/^def read_data(source_path, target_path, max_size=None):$/;"	f
+redefined	seq2seq_model.py	/^from six.moves import xrange  # pylint: disable=redefined-builtin$/;"	i
+redefined	translate.py	/^from six.moves import xrange  # pylint: disable=redefined-builtin$/;"	i
+sampled_loss	seq2seq_model.py	/^      def sampled_loss(inputs, labels):$/;"	f	function:Seq2SeqModel.__init__
+self_test	translate.py	/^def self_test():$/;"	f
+sentence_to_token_ids	data_utils.py	/^def sentence_to_token_ids(sentence, vocabulary,$/;"	f
+seq2seq_f	seq2seq_model.py	/^    def seq2seq_f(encoder_inputs, decoder_inputs, do_decode):$/;"	f	function:Seq2SeqModel.__init__
+seq2seq_model	translate.py	/^from tensorflow.models.rnn.translate import seq2seq_model$/;"	i
+step	seq2seq_model.py	/^  def step(self, session, encoder_inputs, decoder_inputs, target_weights,$/;"	m	class:Seq2SeqModel
+sys	translate.py	/^import sys$/;"	i
+tarfile	data_utils.py	/^import tarfile$/;"	i
+tf	data_utils.py	/^import tensorflow as tf$/;"	i
+tf	seq2seq_model.py	/^import tensorflow as tf$/;"	i
+tf	translate.py	/^import tensorflow as tf$/;"	i
+time	translate.py	/^import time$/;"	i
+train	translate.py	/^def train():$/;"	f
+urllib	data_utils.py	/^from six.moves import urllib$/;"	i
+xrange	seq2seq_model.py	/^from six.moves import xrange  # pylint: disable=redefined-builtin$/;"	i
+xrange	translate.py	/^from six.moves import xrange  # pylint: disable=redefined-builtin$/;"	i
