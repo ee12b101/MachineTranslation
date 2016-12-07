@@ -112,10 +112,10 @@ def main(params):
         lang2Splits[split] = lang2SplitTemp
     
     for split in ['train', 'val', 'test']:
-        with open('/home/santhosh/Projects/MachineTranslationHarvard/seq2seq-attn/data/src-%s.txt'%(split), 'w') as fopen:
+        with open('data/src-%s.txt'%(split), 'w') as fopen:
             for s in lang1Splits[split]:
                 fopen.write(' '.join(s)+'\n')
-        with open('/home/santhosh/Projects/MachineTranslationHarvard/seq2seq-attn/data/targ-%s.txt'%(split), 'w') as fopen:
+        with open('data/targ-%s.txt'%(split), 'w') as fopen:
             for s in lang2Splits[split]:
                 fopen.write(' '.join(s)+'\n')
     

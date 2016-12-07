@@ -26,7 +26,6 @@ import tarfile
 from six.moves import urllib
 
 from tensorflow.python.platform import gfile
-import tensorflow as tf
 
 # Special vocabulary symbols - we always put them at the start.
 _PAD = b"_PAD"
@@ -59,7 +58,7 @@ def maybe_download(directory, filename, url):
     print("Downloading %s to %s" % (url, filepath))
     filepath, _ = urllib.request.urlretrieve(url, filepath)
     statinfo = os.stat(filepath)
-    print("Successfully downloaded", filename, statinfo.st_size, "bytes")
+    print("Succesfully downloaded", filename, statinfo.st_size, "bytes")
   return filepath
 
 
@@ -138,7 +137,6 @@ def create_vocabulary(vocabulary_path, data_path, max_vocabulary_size,
         counter += 1
         if counter % 100000 == 0:
           print("  processing line %d" % counter)
-        line = tf.compat.as_bytes(line)
         tokens = tokenizer(line) if tokenizer else basic_tokenizer(line)
         for w in tokens:
           word = _DIGIT_RE.sub(b"0", w) if normalize_digits else w
@@ -239,8 +237,8 @@ def data_to_token_ids(data_path, target_path, vocabulary_path,
           counter += 1
           if counter % 100000 == 0:
             print("  tokenizing line %d" % counter)
-          token_ids = sentence_to_token_ids(tf.compat.as_bytes(line), vocab,
-                                            tokenizer, normalize_digits)
+          token_ids = sentence_to_token_ids(line, vocab, tokenizer,
+                                            normalize_digits)
           tokens_file.write(" ".join([str(tok) for tok in token_ids]) + "\n")
 
 
